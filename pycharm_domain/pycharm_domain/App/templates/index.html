@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>首页</title>
+		<!-- 引入 Vue.js -->
+		<script src="/static/js/vue.min.js"></script>
+
+		<!-- 引入 Element UI 的样式文件 -->
+		<link rel="stylesheet" href="/static/element-ui/theme-chalk/index.css">
+
+		<!-- 引入 Element UI 的 JavaScript文件 -->
+		<script src="/static/element-ui/index.js"></script>
+
+		<!-- 引入 axios 的 JavaScript文件 -->
+		<script src="/static/js/axios.min.js"></script>
+		<style>
+			body {
+				background-image: url('/static/img/bg.jpg');
+				background-size: cover;
+				/* background-size: 100% 100%; */
+				background-position: center;
+				text-align: center;
+				font-family: Arial, sans-serif;
+				background-attachment: fixed;
+				background-repeat: no-repeat;
+			}
+
+			#search-enter-btn {
+				display: inline-block;
+				font-weight: 500;
+				text-align: center;
+				white-space: nowrap;
+				vertical-align: middle;
+				user-select: none;
+				border: .0625rem solid transparent;
+				padding: .55rem 1.8rem;
+				/* font-size: .9rem; */
+				line-height: 3.0;
+				border-radius: .375rem;
+				/* background-color: #aaffff; */
+				/*background: #11a8cd linear-gradient(180deg, #489dff, #288cff) repeat-x;*/
+				/*border-color: #0f97b9;*/
+				border-bottom: 1px solid #0f97b9;
+				box-shadow: none;
+				cursor: pointer;
+				font-size: 18px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<el-container style="height: 100vh;">
+				<el-header>
+
+				</el-header>
+				<el-main>
+					<el-row type="flex" justify="center" align="middle" style="height: 100%;">
+
+						<el-col :span="18">
+							<div id="centerShow" style="margin-bottom: 40px; text-align: center;font-size: 25px;">
+								<h2 style="font-family: bold; color: #d9ecff">数据目录共享演化平台</h2>
+{#									<h3 style="padding: 10px 50px;">V1.0</h3>#}
+							</div>
+
+							<a href="/information_model2">
+								<el-button type="primary" size="large" id="search-enter-btn">登入</el-button>
+							</a>
+							<!-- // <p style="font-size: 14px;">A system based on konwledge graph</p> -->
+						</el-col>
+					</el-row>
+				</el-main>
+				<el-footer></el-footer>
+			</el-container>
+		</div>
+
+		<script>
+			new Vue({
+				el: '#app',
+			});
+		</script>
+	</body>
+</html>

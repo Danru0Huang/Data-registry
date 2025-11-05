@@ -1,0 +1,22 @@
+[
+    {
+        "className": "\u4eba\u5458",
+        "properties": [
+            "\u4eba\u5458\u5355\u4f4d",
+            "\u4eba\u5458\u540d\u79f0"
+        ],
+        "relatedClass": null
+    },
+    {
+        "className": "\u4e13\u5229",
+        "properties": [
+            "\u4e13\u5229\u53f7",
+            "\u4e13\u5229\u540d\u79f0"
+        ],
+        "relatedClass": [
+            {
+                "\u4eba\u5458": "\u5c5e\u4e8e"
+            }
+        ]
+    }
+]

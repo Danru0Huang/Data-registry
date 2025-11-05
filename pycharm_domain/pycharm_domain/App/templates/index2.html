@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>数据共享及演化工具</title>
+		<!-- 引入 Vue.js -->
+		<script src="/static/js/vue.js"></script>
+		
+		<!-- 引入 Element UI 的样式文件 -->
+		<link rel="stylesheet" href="/static/element-ui/theme-chalk/index.css">
+		<!-- 引入 Element UI 的 JavaScript文件 -->
+		<script src="/static/element-ui/index.js"></script>
+		
+		<!-- 引入 axios 的 JavaScript文件 -->
+		<script src="/static/js/axios.min.js"></script>
+		
+		<!-- 引入 echarts 的 JavaScript文件 -->
+		<script src="/static/js/echarts.min.js"></script>
+		<style>
+			#chartIdModelGraph {
+			  width: 100%;
+			  height: calc(50vh - 20px);
+			  /* height: 300px; */
+			}
+			#chartIdModelData {
+				width: 100%;
+				height: calc(50vh - 20px);
+			}
+			.el-row {
+			    margin-bottom: 2px;
+			    &:last-child {
+			      margin-bottom: 0;
+			    }
+			  }
+			
+		</style>
+	</head>
+	
+	<body>
+		<div id="app">
+			<el-row>
+				<el-col :span="24">
+					<div id="chartIdModelGraph"></div>
+				</el-col>
+			</el-row>
+			<el-row>
+				<el-col :span="24">
+					<div id="chartIdModelData"></div>
+				</el-col>
+			</el-row>
+		</div>
+		<script src="/static/js/index2.js"></script>
+	</body>
+</html>

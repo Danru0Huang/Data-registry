@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>数据共享及演化工具</title>
+		<!-- 引入 Vue.js -->
+		<script src="/static/js/vue.js"></script>
+
+		<!-- 引入 Element UI 的样式文件 -->
+		<link rel="stylesheet" href="/static/element-ui/theme-chalk/index.css">
+		<!-- 引入 Element UI 的 JavaScript文件 -->
+		<script src="/static/element-ui/index.js"></script>
+
+		<!-- 引入 axios 的 JavaScript文件 -->
+		<script src="/static/js/axios.min.js"></script>
+
+		<!-- 引入 echarts 的 JavaScript文件 -->
+		<script src="/static/js/echarts.min.js"></script>
+
+
+		<style>
+			.el-header {
+				background-color: #B3C0D1;
+				color: #333;
+				line-height: 60px;
+			}
+
+			.el-aside {
+				color: #333;
+			}
+
+			.chat-container {
+				height: 750px;
+				padding: 5px;
+				/* display: flex; */
+				flex-direction: column;
+			}
+
+			.message-container {
+				flex: 1;
+				max-height: calc(100% - 60px);
+				overflow-y: auto;
+				padding-bottom: 10px;
+			}
+
+			.message {
+				display: flex;
+				justify-content: flex-start;
+				align-items: flex-start;
+				margin-bottom: 10px;
+			}
+
+			.message.user .message-bubble {
+				margin-left: auto;
+				background-color: #DCF8C6;
+				color: #000;
+			}
+
+			.message.bot .message-bubble {
+				margin-right: auto;
+				background-color: #F0F0F0;
+				color: #000;
+			}
+
+			.message-bubble {
+				max-width: 70%;
+				padding: 10px;
+				border-radius: 10px;
+				background: #fff;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+			}
+
+			.input-container {
+
+				gap: 2px;
+				/* margin-top: 10px; */
+			}
+
+			.input-container .el-input {
+				flex: 2;
+				width: 200px;
+				border-radius: 20px;
+				padding: 5px 5px;
+			}
+
+			.input-container button {
+				flex: none;
+				border-radius: 20%;
+				width: 100px;
+				height: 40px;
+			}
+
+			.text {
+				font-size: 14px;
+			}
+
+			.item {
+				margin-bottom: 18px;
+			}
+
+			.clearfix:before,
+			.clearfix:after {
+				display: table;
+				content: "";
+			}
+
+			.clearfix:after {
+				clear: both
+			}
+
+			.box-card {
+				width: center;
+
+			}
+
+			.sidebar {
+				background-color: #f2f2f2;
+				padding: 20px;
+				display: flex;
+				margin-bottom: 25px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<el-container style="height: calc(100vh - 10px); border: 1px solid #eee">
+				<el-aside width="250px" style="background-color: #545c64">
+					<el-row class="tac">
+						<el-col :span="24">
+							<el-menu :default-active="activeMenu" class="el-menu-vertical-demo" @open="handleOpen"
+								@close="handleClose" background-color="#545c64" text-color="#fff"
+								active-text-color="#ffd04b">
+
+								<el-submenu index="1">
+									<template slot="title">
+										<i class="el-icon-location"></i>
+										<span>信息模型</span>
+									</template>
+									<el-menu-item-group>
+										<a href="/information_model2">
+											<el-menu-item index="1-1">注册</el-menu-item>
+										</a>
+										<a href="/search2">
+											<el-menu-item index="1-2">查询</el-menu-item>
+										</a>
+									</el-menu-item-group>
+								</el-submenu>
+
+								<el-submenu index="2">
+									<template slot="title">
+										<i class="el-icon-location"></i>
+										<span>MDR</span>
+									</template>
+									<el-menu-item-group>
+										<a href="/mdr">
+											<el-menu-item index="2-1">注册</el-menu-item>
+										</a>
+										<a href="/search1">
+											<el-menu-item index="2-2">查询</el-menu-item>
+										</a>
+									</el-menu-item-group>
+								</el-submenu>
+
+
+								<a href="/index2">
+									<el-menu-item index="3">
+										<i class="el-icon-menu"></i>
+										<span slot="title">首页</span>
+									</el-menu-item>
+								</a>
+
+								<a href="/register_subDomain">
+									<el-menu-item index="4">
+										<i class="el-icon-menu"></i>
+										<span slot="title">子域注册</span>
+									</el-menu-item>
+								</a>
+
+							</el-menu>
+						</el-col>
+					</el-row>
+
+				</el-aside>
+
+				<el-container>
+					<el-aside width="200px" class="sidebar">
+						<el-row>
+							<!-- 新增子域注册按钮 -->
+							<el-col style="margin-bottom: 20px;">
+								<el-button type="primary" @click="changeShowDialogOfAddSubDomain">新增子域</el-button>
+							</el-col>
+							
+							<!-- 文件上传按钮 -->
+							<el-col>
+								<el-upload class="upload-demo" :action="uploadUrl" :on-success="handleSuccess"
+									:before-upload="beforeUpload" :file-list="fileList" :limit="1" :accept="'.xlsx'">
+									<el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+									<div slot="tip" class="el-upload__tip">只能上传xlsx文件</div>
+								</el-upload>
+							</el-col>
+							<!-- 文件上传成功提示 -->
+							<el-col>
+								{% raw %}
+								<div v-if="result">
+									<h3>上传成功！</h3>
+									<p>文件名：{{ result.name }}</p>
+									<p>表标识符：</p>
+									<pre>{{ identifier_table }}</pre>
+								</div>
+								{% endraw %}
+							</el-col>
+						</el-row>
+					</el-aside>
+					<el-main>
+						<el-row :gutter="10">
+							<!-- 子域图谱展示区域 -->
+							<el-col :span="18" style="height: calc(100vh - 20px);">
+								<div id="graphOfTable" style="height: calc(100vh - 20px);">
+								</div>
+							</el-col>
+							<el-col :span="6">
+								<template>
+									<el-tabs v-model="activeName" @tab-click="handleClick">
+										
+										<!-- 建立表属性与数据元之间联系 -->
+										<el-tab-pane label="表属性" name="first">
+											<el-divider content-position="center">表属性名</el-divider>
+											<div style="margin: 20px;">
+												<el-input v-model="attributeName" :disabled="true"></el-input>
+											</div>
+											<el-divider content-position="center">数据元</el-divider>
+											<div style="margin: 20px; display: flex;">
+												<el-select v-model="dataElement" filterable remote
+													:value-key="'label'" clearable>
+													{% raw %}
+													<el-option v-for="option in dataElementOptions" :key="option.value"
+														:label="option.label" :value="option.value">
+														<span style="float: left">{{ option.label }}</span>
+														<span
+															style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+													</el-option>
+													{% endraw %}
+												</el-select>
+											</div>
+											<div style="margin: 20px; display: flex;">
+												<el-button type="primary"
+													@click="addRelationBetweenAttributeAndDataElement">添加联系</el-button>
+											</div>
+											
+											<!-- 建立表属性与值域的联系 -->
+											<el-divider content-position="center">值域</el-divider>
+											<div style="margin: 20px; display: flex;">
+												<el-select v-model="valueDomain" filterable remote
+													:value-key="'label'" clearable>
+													{% raw %}
+													<el-option v-for="option in valueDomainOptions" :key="option.value"
+														:label="option.label" :value="option.value">
+														<span style="float: left">{{ option.label }}</span>
+														<span
+															style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+													</el-option>
+													{% endraw %}
+												</el-select>
+											</div>
+											<div style="margin: 20px; display: flex;">
+												<el-button type="primary"
+													@click="addRelationBetweenAttributeAndValueDomain">添加联系</el-button>
+											</div>
+
+										</el-tab-pane>
+										<!-- 建立表属性与可允许值联系 -->
+										<el-tab-pane label="表属性值" name="second">
+											<el-divider content-position="center">表属性值名</el-divider>
+											<div style="margin: 20px;">
+												<el-input v-model="attributeValueName" :disabled="true"></el-input>
+											</div>
+											<el-divider content-position="center">可允许值</el-divider>
+											<div class="block">
+												<span class="demonstration">请选择</span>
+												<el-cascader v-model="permissibleValues"
+													:options="permissibleValuesOptions" filterable clearable></el-cascader>
+											</div>
+											<div style="margin: 20px; display: flex;">
+												<el-button type="primary"
+													@click="addRelationBetweenAttributeValueAndPermissibleValues">添加联系</el-button>
+											</div>
+										</el-tab-pane>
+									</el-tabs>
+								</template>
+							</el-col>
+						</el-row>
+					</el-main>
+				</el-container>
+				
+				<!-- 新增子域弹框 -->
+				<el-dialog title="新增子域" :visible.sync="showDialogOfAddSubDomain" width="25%" :before-close="dialogClose"
+					center>
+					<span>
+						<el-form ref="addSubDomainForm" :model="addSubDomainData" label-width="auto"
+							style="margin-top: 20px;">
+							<el-form-item label="子域名称">
+								<el-input v-model="addSubDomainData.name" clearable></el-input>
+							</el-form-item>
+							<el-form-item label="描述">
+								<el-input v-model="addSubDomainData.describe" type="textarea" :rows="2"
+									clearable></el-input>
+							</el-form-item>
+						</el-form>
+					</span>
+					<span slot="footer" class="dialog-footer">
+						<el-button type="danger" @click="resetForm">重置</el-button>
+						<el-button type="primary" @click="addSubDomain">添加</el-button>
+						<el-button type="danger" @click="showDialogOfAddSubDomain = false">取
+							消</el-button>
+					</span>
+				</el-dialog>
+				
+				<!-- 当文件上传成功时弹出该弹框,要求用户为该新上传的文件选择挂载的子域,并建立联系 -->
+				{% raw %}
+				<el-dialog title="请为数据选择子域" :visible.sync="showDialogOfSelectSubDomain" width="25%" center>
+					<span>
+						<el-descriptions title="表信息" :bordered="true" border v-if="result">
+							<el-descriptions-item label="表名">{{ result.name }}</el-descriptions-item>
+							<el-descriptions-item label="标识符">{{ identifier_table }}</el-descriptions-item>
+						</el-descriptions>
+						<el-select v-model="subDomainName" filterable default-first-option placeholder="请选子域"
+							@change="handleSelectChangeOfSubdomain">
+							<el-option v-for="item in optionsOfSubDomain" :key="item.value" :label="item.label"
+								:value="item.value">
+							</el-option>
+						</el-select>
+						<el-descriptions :title="subDomainName" :bordered="true" v-if="selectedOption" border>
+							<el-descriptions-item label="描述">{{ selectedOption.describe }}</el-descriptions-item>
+						</el-descriptions>
+					</span>
+					<span slot="footer" class="dialog-footer">
+						<el-button type="primary" @click="addRelationBetweenTableAndSubdomain">确定</el-button>
+					</span>
+				</el-dialog>
+				{% endraw %}
+
+			</el-container>
+		</div>
+
+		<script src="/static/js/register_subDomain.js"></script>
+	</body>
+</html>

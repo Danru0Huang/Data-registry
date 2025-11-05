@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>数据共享及演化工具</title>
+		<!-- 引入 Vue.js -->
+		<script src="/static/js/vue.min.js"></script>
+
+		<!-- 引入 Element UI 的样式文件 -->
+		<link rel="stylesheet" href="/static/element-ui/theme-chalk/index.css">
+
+		<!-- 引入 Element UI 的 JavaScript文件 -->
+		<script src="/static/element-ui/index.js"></script>
+
+		<!-- 引入 axios 的 JavaScript文件 -->
+		<script src="/static/js/axios.min.js"></script>
+
+		<style>
+			.el-menu-vertical-demo {
+				height: 100vh;
+			}
+
+			.el-header {
+				background-color: #B3C0D1;
+				color: #333;
+				line-height: 60px;
+				text-align: center;
+			}
+
+			.el-container {
+				height: 680px;
+			}
+
+			.el-aside {
+				color: #333;
+			}
+
+			.text {
+				font-size: 14px;
+			}
+
+			.item {
+				margin-bottom: 18px;
+			}
+
+			.sidebar {
+				background-color: #f2f2f2;
+				padding: 20px;
+			}
+
+			.button {
+				width: 100%;
+				margin-bottom: 10px;
+			}
+
+			.main {
+				display: flex;
+				justify-content: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<el-container style="height: auto; border: 1px solid #eee">
+				<el-aside width="250px" style="background-color: #545c64">
+					<el-row class="tac">
+						<el-col :span="24">
+							<el-menu :default-active="activeMenu" class="el-menu-vertical-demo" @open="handleOpen"
+								@close="handleClose" background-color="#545c64" text-color="#fff"
+								active-text-color="#ffd04b">
+
+								<el-submenu index="1">
+									<template slot="title">
+										<i class="el-icon-location"></i>
+										<span>信息模型</span>
+									</template>
+									<el-menu-item-group>
+										<a href="/information_model2">
+											<el-menu-item index="1-1">注册</el-menu-item>
+										</a>
+										<a href="/search2">
+											<el-menu-item index="1-2">查询</el-menu-item>
+										</a>
+									</el-menu-item-group>
+								</el-submenu>
+
+								<el-submenu index="2">
+									<template slot="title">
+										<i class="el-icon-location"></i>
+										<span>MDR</span>
+									</template>
+									<el-menu-item-group>
+										<a href="/mdr">
+											<el-menu-item index="2-1">注册</el-menu-item>
+										</a>
+										<a href="/search1">
+											<el-menu-item index="2-2">查询</el-menu-item>
+										</a>
+									</el-menu-item-group>
+								</el-submenu>
+
+
+								<a href="/index2">
+									<el-menu-item index="3">
+										<i class="el-icon-menu"></i>
+										<span slot="title">首页</span>
+									</el-menu-item>
+								</a>
+								
+								<a href="/register_subDomain">
+									<el-menu-item index="4">
+										<i class="el-icon-menu"></i>
+										<span slot="title">子域注册</span>
+									</el-menu-item>
+								</a>
+
+							</el-menu>
+						</el-col>
+					</el-row>
+				</el-aside>
+
+				<el-container>
+					<el-header>MDR注册</el-header>
+					<el-container>
+						<el-aside width="200px">
+							<el-aside class="sidebar" width="200px">
+								<el-row>
+									<el-col>
+										<el-button class="button" type="primary" @click="changeShowObjectClass">
+											对象类
+										</el-button>
+									</el-col>
+								</el-row>
+								<el-row>
+									<el-col>
+										<el-button class="button" type="primary" @click="changeShowProperty">
+											属性
+										</el-button>
+									</el-col>
+								</el-row>
+								<el-row>
+									<el-col>
+										<el-button class="button" type="primary" @click="changeShowConceptualDomain">
+											概念域
+										</el-button>
+									</el-col>
+								</el-row>
+								<el-row>
+									<el-col>
+										<el-button class="button" type="primary" @click="changeShowDataElementConcept">
+											数据元概念
+										</el-button>
+									</el-col>
+								</el-row>
+								<el-row>
+									<el-col>
+										<el-button class="button" type="primary" @click="changeShowValueDomain">
+											值域
+										</el-button>
+									</el-col>
+								</el-row>
+								<el-row>
+									<el-col>
+										<el-button class="button" type="primary" @click="changeShowDataElement">
+											数据元
+										</el-button>
+									</el-col>
+								</el-row>
+							</el-aside>
+						</el-aside>
+						<el-main class="main">
+							<!-- 对象类注册 -->
+							<div v-show="showObjectClass">
+								<div>
+									<h3>对象类注册</h3>
+								</div>
+								<div>
+									<el-form ref="registerObjectClassForm" :model="registerObjectClassData"
+										label-width="auto" style="margin-top: 20px; width: 400px; "
+										v-show="showObjectClass">
+										<el-form-item label="名称" prop="name">
+											<el-input v-model="registerObjectClassData.name" width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="描述" prop="describe">
+											<el-input v-model="registerObjectClassData.describe"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建人员ID" prop="personId">
+											<el-input v-model="registerObjectClassData.personId"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建单位" prop="department">
+											<el-input v-model="registerObjectClassData.department"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-button type="primary" @click="registerObjectClass">注册</el-button>
+										<el-button type="danger"
+											@click="resetForm('registerObjectClassForm')">重置</el-button>
+									</el-form>
+								</div>
+							</div>
+							
+							<!-- 属性注册 -->
+							<div v-show="showProperty">
+								<div>
+									<h3>属性注册</h3>
+								</div>
+								<div>
+									<el-form ref="registerPropertyForm" :model="registerPropertyData" label-width="auto"
+										style="margin-top: 20px; width: 400px;" v-show="showProperty">
+										<el-form-item label="名称" prop="name">
+											<el-input v-model="registerPropertyData.name" width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="描述" prop="describe">
+											<el-input v-model="registerPropertyData.describe" width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建人员ID" prop="personId">
+											<el-input v-model="registerPropertyData.personId" width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建单位" prop="department">
+											<el-input v-model="registerPropertyData.department" width="20px"></el-input>
+										</el-form-item>
+										<el-button type="primary" @click="registerProperty">注册</el-button>
+										<el-button type="danger"
+											@click="resetForm('registerPropertyForm')">重置</el-button>
+									</el-form>
+								</div>
+							</div>
+							
+							<!-- 概念域注册 -->
+							<div v-show="showConceptualDomain">
+								<div>
+									<h3>概念域注册</h3>
+								</div>
+								<div>
+									{% raw %}
+									<el-form :model="registerConceptualDomainData" ref="registerConceptualDomainForm"
+										label-width="auto" class="demo-dynamic" style="width: 400px;"
+										v-show="showConceptualDomain">
+										<el-form-item label="名称" prop="name">
+											<el-input v-model="registerConceptualDomainData.name"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="描述" prop="describe">
+											<el-input v-model="registerConceptualDomainData.describe"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建人员ID" prop="personId">
+											<el-input v-model="registerConceptualDomainData.personId"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建单位" prop="department">
+											<el-input v-model="registerConceptualDomainData.department"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item
+											v-for="(valueMeaning, index) in registerConceptualDomainData.valueMeanings"
+											:label="'值含义' + (startIndex + index)" :key="startIndex + index"
+											prop="'valueMeaning'  + (startIndex + index)">
+											<div style="display: flex; align-items: center;">
+												<el-input
+													v-model="registerConceptualDomainData.valueMeanings[index]"></el-input>
+												<el-button icon="el-icon-delete"
+													@click.prevent="removeValueMeaning(valueMeaning)"
+													circle></el-button>
+											</div>
+										</el-form-item>
+										<el-form-item>
+											<el-button type="primary" @click="registerConceptualDomain">注册</el-button>
+											<el-button @click="addValueMeaning" icon="el-icon-plus">新增值含义</el-button>
+											<el-button type="danger"
+												@click="resetForm('registerConceptualDomainForm')">重置</el-button>
+										</el-form-item>
+									</el-form>
+									{% endraw %}
+								</div>
+							</div>
+							
+							<!-- 数据元概念注册 -->
+							<div v-show="showDataElementConcept">
+								<div>数据元概念注册</div>
+								<div>
+									<el-form ref="registerDataElementConceptForm"
+										:model="registerDataElementConceptData" label-width="auto"
+										style="margin-top: 20px; width: 400px;" v-show="showDataElementConcept">
+										<el-form-item label="名称" prop="name">
+											<el-input v-model="registerDataElementConceptData.name"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="描述" prop="describe">
+											<el-input v-model="registerDataElementConceptData.describe"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建人员ID" prop="personId">
+											<el-input v-model="registerDataElementConceptData.personId"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建单位" prop="department">
+											<el-input v-model="registerDataElementConceptData.department"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="对象类" prop="objectClass">
+											<el-select v-model="registerDataElementConceptData.objectClass" filterable
+												remote :remote-method="searchObjectClass" :loading="objectClassLoading"
+												:value-key="'label'" :remote="true">
+												{% raw %}
+												<el-option v-for="option in objectClassOptions" :key="option.value"
+													:label="option.label" :value="option.value">
+													<span style="float: left">{{ option.label }}</span>
+													<span
+														style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+												</el-option>
+												{% endraw %}
+											</el-select>
+										</el-form-item>
+
+										<el-form-item label="属性" prop="property">
+											<el-select v-model="registerDataElementConceptData.property" filterable
+												remote :remote-method="searchProperty" :loading="propertyLoading"
+												:value-key="'label'" :remote="true">
+												{% raw %}
+												<el-option v-for="option in propertyOptions" :key="option.value"
+													:label="option.label" :value="option.value">
+													<span style="float: left">{{ option.label }}</span>
+													<span
+														style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+												</el-option>
+												{% endraw %}
+											</el-select>
+										</el-form-item>
+
+										<el-form-item label="概念域" prop="conceptualDomain">
+											<el-select v-model="registerDataElementConceptData.conceptualDomain"
+												filterable remote :remote-method="searchConceptualDomain"
+												:loading="conceptualDomainLoading" :value-key="'label'" :remote="true">
+												{% raw %}
+												<el-option v-for="option in conceptualDomainOptions" :key="option.value"
+													:label="option.label" :value="option.value">
+													<span style="float: left">{{ option.label }}</span>
+													<span
+														style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+												</el-option>
+												{% endraw %}
+											</el-select>
+										</el-form-item>
+
+										<el-form-item>
+											<el-button type="primary" @click="registerDataElementConcept">注册</el-button>
+											<el-button type="danger"
+												@click="resetForm('registerDataElementConceptForm')">重置</el-button>
+										</el-form-item>
+									</el-form>
+								</div>
+							</div>
+							
+							<!-- 值域注册 -->
+							<div v-show="showValueDomain">
+								<div>
+									<h3>值域注册</h3>
+								</div>
+								<div>
+									<el-form ref="registerValueDomainForm" :model="registerValueDomainData"
+										label-width="auto" style="margin-top: 20px; width: 400px;"
+										v-show="showValueDomain">
+										<el-form-item label="名称" prop="name">
+											<el-input v-model="registerValueDomainData.name" width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="描述" prop="describe">
+											<el-input v-model="registerValueDomainData.describe"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建人员ID" prop="personId">
+											<el-input v-model="registerValueDomainData.personId"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建单位" prop="department">
+											<el-input v-model="registerValueDomainData.department"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="不可枚举" prop="indefinite">
+											<el-input v-model="registerValueDomainData.indefinite"
+												width="20px"></el-input>
+										</el-form-item>
+
+										<el-form-item label="可枚举" prop="enumerable">
+											<div v-for="(item, index) in registerValueDomainData.enumerable"
+												:key="index">
+												<el-form-item :label="`${index + 1}`">
+													<div style="align-items: center;">
+														<div style="width: 100%; display: flex;">
+															<el-input v-model="item.value" placeholder="请输入值"></el-input>
+															<el-input v-model="item.num" placeholder="请输入组号"></el-input>
+														</div>
+														<div style="align-items: center; display: flex;">
+															<el-select v-model="item.valueMeaning" filterable remote
+																:remote-method="searchValueMeanings"
+																:loading="valueMeaningsLoading" :value-key="'label'"
+																:remote="true">
+																{% raw %}
+																<el-option v-for="option in valueMeaningsOptions"
+																	:key="option.value" :label="option.label"
+																	:value="option.value" placeholder="值含义">
+																	<span style="float: left">{{ option.label }}</span>
+																	<span
+																		style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+																</el-option>
+																{% endraw %}
+															</el-select>
+															<el-button icon="el-icon-delete" @click.prevent="removePermissibleValues(item)"></el-button>
+														</div>	
+													</div>
+												</el-form-item>
+											</div>
+											<div>
+												<el-button type="primary" icon="el-icon-plus"
+													@click="addValueDomainItem">添加</el-button>
+											</div>
+										</el-form-item>
+										<el-form-item label="概念域" prop="conceptualDomain">
+											<el-select v-model="registerValueDomainData.conceptualDomain" filterable
+												remote :remote-method="searchConceptualDomain"
+												:loading="conceptualDomainLoading" :value-key="'label'" :remote="true">
+												{% raw %}
+												<el-option v-for="option in conceptualDomainOptions" :key="option.value"
+													:label="option.label" :value="option.value">
+													<span style="float: left">{{ option.label }}</span>
+													<span
+														style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+												</el-option>
+												{% endraw %}
+											</el-select>
+										</el-form-item>
+
+										<el-form-item>
+											<el-button type="primary" @click="registerValueDomain">注册</el-button>
+											<el-button type="danger"
+												@click="resetForm('registerValueDomainForm')">重置</el-button>
+										</el-form-item>
+									</el-form>
+								</div>
+							</div>
+							
+							<!-- 数据元注册 -->
+							<div v-show="showDataElement">
+								<div>
+									<h3>数据元注册</h3>
+								</div>
+								<div>
+									<el-form ref="registerDataElementForm" :model="registerDataElementData"
+										label-width="auto" style="margin-top: 20px; width: 400px;"
+										v-show="showDataElement">
+										<el-form-item label="名称" prop="name">
+											<el-input v-model="registerDataElementData.name" width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="描述" prop="describe">
+											<el-input v-model="registerDataElementData.describe"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建人员ID" prop="personId">
+											<el-input v-model="registerDataElementData.personId"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="创建单位" prop="department">
+											<el-input v-model="registerDataElementData.department"
+												width="20px"></el-input>
+										</el-form-item>
+										<el-form-item label="数据元概念" prop="dataElementConcept">
+											<el-select v-model="registerDataElementData.dataElementConcept" filterable
+												remote :remote-method="searchDataElementConcept"
+												:loading="dataElementConceptLoading" :value-key="'label'"
+												:remote="true">
+												{% raw %}
+												<el-option v-for="option in dataElementConceptOptions"
+													:key="option.value" :label="option.label" :value="option.value">
+													<span style="float: left">{{ option.label }}</span>
+													<span
+														style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+												</el-option>
+												{% endraw %}
+											</el-select>
+										</el-form-item>
+										<el-form-item label="值域" prop="valueDomain">
+											<el-select v-model="registerDataElementData.valueDomain" filterable remote
+												:remote-method="searchValueDomain" :loading="valueDomainLoading"
+												:value-key="'label'" :remote="true">
+												{% raw %}
+												<el-option v-for="option in valueDomainOptions" :key="option.value"
+													:label="option.label" :value="option.value">
+													<span style="float: left">{{ option.label }}</span>
+													<span
+														style="float: right; color: #8492a6; font-size: 13px">{{ option.value }}</span>
+												</el-option>
+												{% endraw %}
+											</el-select>
+										</el-form-item>
+										<el-form-item>
+											<el-button type="primary" @click="registerDataElement">注册</el-button>
+											<el-button type="danger"
+												@click="resetForm('registerDataElementForm')">重置</el-button>
+										</el-form-item>
+									</el-form>
+								</div>
+							</div>
+
+						</el-main>
+					</el-container>
+				</el-container>
+
+
+			</el-container>
+		</div>
+		<script src="/static/js/mdr.js"></script>
+	</body>
+</html>

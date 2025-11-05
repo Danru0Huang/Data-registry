@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>数据共享及演化工具</title>
+		<!-- 引入 Vue.js -->
+		<script src="/static/js/vue.js"></script>
+
+		<!-- 引入 Element UI 的样式文件 -->
+		<link rel="stylesheet" href="/static/element-ui/theme-chalk/index.css">
+		<!-- 引入 Element UI 的 JavaScript文件 -->
+		<script src="/static/element-ui/index.js"></script>
+
+		<!-- 引入 axios 的 JavaScript文件 -->
+		<script src="/static/js/axios.min.js"></script>
+
+		<!-- 引入 echarts 的 JavaScript文件 -->
+		<script src="/static/js/echarts.min.js"></script>
+
+
+		<style>
+			.el-header {
+				background-color: #B3C0D1;
+				color: #333;
+				line-height: 60px;
+			}
+
+			.el-aside {
+				color: #333;
+			}
+
+			.chat-container {
+				height: 750px;
+				padding: 5px;
+				/* display: flex; */
+				flex-direction: column;
+			}
+
+			.message-container {
+				flex: 1;
+				max-height: calc(100% - 60px);
+				overflow-y: auto;
+				padding-bottom: 10px;
+			}
+
+			.message {
+				display: flex;
+				justify-content: flex-start;
+				align-items: flex-start;
+				margin-bottom: 10px;
+			}
+
+			.message.user .message-bubble {
+				margin-left: auto;
+				background-color: #DCF8C6;
+				color: #000;
+			}
+
+			.message.bot .message-bubble {
+				margin-right: auto;
+				background-color: #F0F0F0;
+				color: #000;
+			}
+
+			.message-bubble {
+				max-width: 70%;
+				padding: 10px;
+				border-radius: 10px;
+				background: #fff;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+			}
+
+			.input-container {
+
+				gap: 2px;
+				/* margin-top: 10px; */
+			}
+
+			.input-container .el-input {
+				flex: 2;
+				width: 200px;
+				border-radius: 20px;
+				padding: 5px 5px;
+			}
+
+			.input-container button {
+				flex: none;
+				border-radius: 20%;
+				width: 100px;
+				height: 40px;
+			}
+
+			.text {
+				font-size: 14px;
+			}
+
+			.item {
+				margin-bottom: 18px;
+			}
+
+			.clearfix:before,
+			.clearfix:after {
+				display: table;
+				content: "";
+			}
+
+			.clearfix:after {
+				clear: both
+			}
+
+			.box-card {
+				width: center;
+
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<el-container style="height: auto; border: 1px solid #eee">
+				<el-aside width="250px" style="background-color: #545c64">
+					<el-row class="tac">
+						<el-col :span="24">
+							<el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen"
+								@close="handleClose" background-color="#545c64" text-color="#fff"
+								active-text-color="#ffd04b">
+
+								<a href="/ontology">
+									<el-menu-item index="1">
+										<i class="el-icon-menu"></i>
+										<span slot="title">本体</span>
+									</el-menu-item>
+								</a>
+								
+								<a href="/register">
+									<el-menu-item index="2">
+										<i class="el-icon-menu"></i>
+										<span slot="title">注册</span>
+									</el-menu-item>
+								</a>
+								
+								<a href="/search">
+									<el-menu-item index="3">
+										<i class="el-icon-document"></i>
+										<span slot="title">查询</span>
+									</el-menu-item>
+								</a>
+
+							</el-menu>
+						</el-col>
+					</el-row>
+
+				</el-aside>
+
+				<el-container>
+					<el-main>
+						<el-card class="box-card">
+							<div slot="header" class="clearfix input-container" style="text-align: center;">
+								<!-- <input type="text" v-model="searchInput" placeholder="请输入你要检索的内容..."> -->
+								<el-select v-model="selectedLabel" placeholder="请选择查询节点的标签">
+									<el-option v-for="label in labelOptions" :key="label" :label="label"
+										:value="label"></el-option>
+								</el-select>
+								<el-input placeholder="请输入你要检索的内容..." v-model="searchInput" clearable></el-input>
+								<!-- <button @click="search">搜索</button> -->
+								<el-button type="primary" icon="el-icon-search" @click="search" round>搜索</el-button>
+							</div>
+							<!-- <div class="chat-container" :id="chartId"></div> -->
+							<el-row :gutter="5">
+								<el-col :span="15">
+									<div class="chat-container" :id="chartId"></div>
+								</el-col>
+								<el-col :span="9">
+									<template>
+										<el-table :data="tableData" style="width: 100%"
+											:row-class-name="tableRowClassName" v-show="showTable" border
+											max-height="750px" header-align="center">
+											<el-table-column prop="start" label="start-node" width="170">
+											</el-table-column>
+											<el-table-column prop="relation" label="relation">
+											</el-table-column>
+											<el-table-column prop="end" label="end-node" width="180">
+											</el-table-column>
+										</el-table>
+									</template>
+
+
+									<el-dialog title="节点信息" :visible.sync="dialogVisible" width="30%"
+										:before-close="handleClose">
+										<span>
+											<div v-text="nodeDetails.category"></div>
+											<ul>
+												{% raw %}
+												<li v-for="(val, key) in nodeDetails.properties">{{key}}--{{val}}</li>
+												{% endraw %}
+											</ul>
+											
+										</span>
+										<span slot="footer" class="dialog-footer">
+											<el-button @click="dialogVisible = false">取 消</el-button>
+											<el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+										</span>
+									</el-dialog>
+
+
+
+								</el-col>
+							</el-row>
+						</el-card>
+					</el-main>
+				</el-container>
+
+			</el-container>
+		</div>
+
+		<script src="/static/js/search1.js"></script>
+	</body>
+</html>

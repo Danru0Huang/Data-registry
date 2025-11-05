@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+	<body>
+		<div id="app">
+			<el-container style="height: auto; border: 1px solid #eee">
+				<el-container>
+					<el-main>
+						<el-card class="box-card">
+							<div slot="header" class="clearfix input-container" style="text-align: center;">
+								<!-- <input type="text" v-model="searchInput" placeholder="请输入你要检索的内容..."> -->
+								<el-select v-model="selectedLabel" placeholder="请选择查询节点的标签">
+								  <el-option v-for="label in labelOptions" :key="label" :label="label" :value="label"></el-option>
+								</el-select>
+								<el-input placeholder="请输入你要检索的内容..." v-model="searchInput" clearable></el-input>
+								<!-- <button @click="search">搜索</button> -->
+								<el-button type="primary" icon="el-icon-search" @click="search" round>搜索</el-button>
+							</div>
+							<!-- <div class="chat-container" :id="chartId"></div> -->
+							<el-row :gutter="5">
+								<el-col :span="15">
+									<div class="chat-container" :id="chartId"></div>
+								</el-col>
+								<el-col :span="9">
+									<template>
+										<el-table :data="tableData" style="width: 100%"
+											:row-class-name="tableRowClassName" v-show="showTable" border
+											max-height="750px" header-align="center">
+											<el-table-column prop="start" label="start-node" width="170">
+											</el-table-column>
+											<el-table-column prop="relation" label="relation">
+											</el-table-column>
+											<el-table-column prop="end" label="end-node" width="180">
+											</el-table-column>
+										</el-table>
+									</template>
+									
+									<el-dialog
+									  title="提示"
+									  :visible.sync="dialogVisible"
+									  width="30%"
+									  :before-close="handleClose">
+									  <span>这是一段信息</span>
+									  <span slot="footer" class="dialog-footer">
+									    <el-button @click="dialogVisible = false">取 消</el-button>
+									    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+									  </span>
+									</el-dialog>
+									
+								</el-col>
+							</el-row>
+						</el-card>
+					</el-main>
+				</el-container>
+
+			</el-container>
+		</div>
+
+		<script src="/static/js/search.js">
+			var app = new Vue({
+				el: '#app',
+				data: {
+					searchInput: '',
+					graphData: [],
+					graphLinks: [],
+					chartId: 'guanxi',
+					tableData: [],
+					showTable: false,
+					dialogVisible: false,
+					selectedLabel: '',
+					labelOptions: ["Conceptual_Domain", "Context", "Data_Element", "Data_Element_Concept",
+						"Diagram", "Domain", "Entity_Type", "Information_Model",
+						"Information_Modelling_Language", "MDR_Registry", "Model_Element_Set",
+						"Model_Element_Set_Mapping", "Model_Element_Set_Mapping_Type", "Model_Mapping",
+						"Non_Key_Attribute", "Object_Class", "Permissible_Values", "Property",
+						"Relationship", "Relationship_End", "Relationship_End_Group", "Representation_Class",
+						"Subdomain", "Value_Domain", "Value_Meanings"
+					],
+					categories: [
+						"Conceptual_Domain",
+						"Context",
+						"Data_Element",
+						"Data_Element_Concept",
+						"Diagram",
+						"Domain",
+						"Entity_Type",
+						"Information_Model",
+						"Information_Modelling_Language",
+						"MDR_Registry",
+						"Model_Element_Set",
+						"Model_Element_Set_Mapping",
+						"Model_Element_Set_Mapping_Type",
+						"Model_Mapping",
+						"Non_Key_Attribute",
+						"Object_Class",
+						"Permissible_Values",
+						"Property",
+						"Relationship",
+						"Relationship_End",
+						"Relationship_End_Group",
+						"Representation_Class",
+						"Subdomain",
+						"Value_Domain",
+						"Value_Meanings"
+					]
+			
+			
+				},
+				methods: {
+					search: function() {
+						var vm = this;
+						axios.get('/search_name', {
+								params: {
+									name: this.searchInput,
+									label: this.selectedLabel
+								}
+							})
+							.then(function(response) {
+								if (response.data.data.length == 0) {
+									vm.openError();
+								} else {
+									vm.graphData = response.data.data.map(function(node, idx) {
+										node.id = idx;
+										return node;
+									});
+									vm.graphLinks = response.data.links;
+									updateChart(vm.chartId, vm.graphData, vm.graphLinks);
+									vm.tableData = response.data.tableData;
+									vm.showTable = true;
+								}
+			
+							})
+							.catch(function(error) {
+								console.log(error);
+							});
+					},
+					handleOpen(key, keyPath) {
+						console.log(key, keyPath);
+					},
+					handleClose(key, keyPath) {
+						console.log(key, keyPath);
+					},
+					openError() {
+						this.$message.error('未查询到结果，请检查输入查询内容是否正确！');
+					},
+					andleClose(done) {
+					        this.$confirm('确认关闭？')
+					          .then(_ => {
+					            done();
+					          })
+					          .catch(_ => {});
+					},
+					showNodeResult(message) {
+						var vm = this;
+						vm.dialogVisible = true;
+					}
+				}
+			});
+			
+			function updateChart(chartId, graphData, graphLinks) {
+				var myChart = echarts.init(document.getElementById(chartId));
+			
+				var option = {
+					title: {
+						textStyle: {
+							fontWeight: "lighter"
+						}
+					},
+					// animationDurationUpdate 设置图表更新动画的持续时间
+					animationDurationUpdate: 1500,
+					// animationEasingUpdate 设置图表更新动画的缓动效果
+					animationEasingUpdate: 'quinticInOut',
+					legend: {
+						x: "center",
+						show: true,
+						data: ["Conceptual_Domain", "Context", "Data_Element", "Data_Element_Concept",
+							"Diagram", "Domain", "Entity_Type", "Information_Model",
+							"Information_Modelling_Language", "MDR_Registry", "Model_Element_Set",
+							"Model_Element_Set_Mapping", "Model_Element_Set_Mapping_Type", "Model_Mapping",
+							"Non_Key_Attribute", "Object_Class", "Permissible_Values", "Property",
+							"Relationship", "Relationship_End", "Relationship_End_Group", "Representation_Class",
+							"Subdomain", "Value_Domain", "Value_Meanings"
+						]
+					},
+					series: [{
+						type: 'graph',
+						layout: 'force',
+						symbolSize: 60,
+						edgeSymbol: ['circle', 'arrow'],
+						edgeSymbolSize: [4, 4],
+						edgeLabel: {
+							normal: {
+								show: true,
+								textStyle: {
+									fontSize: 12
+								},
+								formatter: "{c}"
+							}
+						},
+						force: {
+							repulsion: 2500,
+							edgeLength: [10, 100]
+						},
+						focusNodeAdjacency: true,
+						draggable: true,
+						roam: true,
+						categories: [{
+								name: 'Conceptual_Domain'
+							},
+							{
+								name: 'Context'
+							},
+							{
+								name: 'Data_Element'
+							},
+							{
+								name: 'Data_Element_Concept'
+							},
+							{
+								name: 'Diagram'
+							},
+							{
+								name: "Domain"
+							},
+							{
+								name: "Entity_Type"
+							},
+							{
+								name: "Information_Model"
+							},
+							{
+								name: "Information_Modelling_Language"
+							},
+							{
+								name: "MDR_Registry"
+							},
+							{
+								name: "Model_Element_Set"
+							},
+							{
+								name: "Model_Element_Set_Mapping"
+							},
+							{
+								name: "Model_Element_Set_Mapping_Type"
+							},
+							{
+								name: "Model_Mapping"
+							},
+							{
+								name: "Non_Key_Attribute"
+							},
+							{
+								name: "Object_Class"
+							},
+							{
+								name: "Permissible_Values"
+							},
+							{
+								name: "Property"
+							},
+							{
+								name: "Relationship"
+							},
+							{
+								name: "Relationship_End"
+							},
+							{
+								name: "Relationship_End_Group"
+							},
+							{
+								name: "Representation_Class"
+							},
+							{
+								name: "Subdomain"
+							},
+							{
+								name: "Value_Domain"
+							},
+							{
+								name: "Value_Meanings"
+							}
+						],
+						label: {
+							normal: {
+								show: true,
+								textStyle: {
+									fontSize: 15
+								},
+							}
+						},
+						lineStyle: {
+							normal: {
+								opacity: 0.9,
+								width: 1,
+								curveness: 0.3
+							}
+						},
+						nodes: graphData,
+						links: graphLinks
+					}]
+				};
+			
+				myChart.setOption(option, true);
+				myChart.off('click');
+				myChart.on("click", function(params) {
+					var name = params.name
+					var category_id = params.data.category;
+					var category = app.categories[category_id];
+					axios.get('/search_node', {
+							params: {
+								category: category,
+								name: name
+							}
+						})
+						.then(function(response) {
+							var dialogData = response.data; // 实际的查询结果数据
+							app.dialogVisible = true;
+							app.showNodeResult(dialogData);
+							
+					
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				});
+			}
+			
+		</script>
+	</body>
+</html>

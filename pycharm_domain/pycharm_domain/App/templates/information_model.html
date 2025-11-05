@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>数据共享及演化工具</title>
+		<!-- 引入 Vue.js -->
+		<script src="/static/js/vue.min.js"></script>
+
+		<!-- 引入 Element UI 的样式文件 -->
+		<link rel="stylesheet" href="/static/element-ui/theme-chalk/index.css">
+
+		<!-- 引入 Element UI 的 JavaScript文件 -->
+		<script src="/static/element-ui/index.js"></script>
+
+		<!-- 引入 axios 的 JavaScript文件 -->
+		<script src="/static/js/axios.min.js"></script>
+
+		<style>
+			.el-menu-vertical-demo {
+				height: 100vh;
+			}
+
+			.el-header {
+				background-color: #B3C0D1;
+				color: #333;
+				line-height: 60px;
+				text-align: center;
+			}
+
+			.el-container {
+				height: 680px;
+			}
+
+			.el-aside {
+				color: #333;
+			}
+
+			.text {
+				font-size: 14px;
+			}
+
+			.item {
+				margin-bottom: 18px;
+			}
+
+			.sidebar {
+				background-color: #f2f2f2;
+				padding: 20px;
+			}
+
+			.button {
+				width: 100%;
+				margin-bottom: 10px;
+			}
+
+			.main {
+				display: flex;
+				justify-content: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<el-container style="height: auto; border: 1px solid #eee">
+				<el-aside width="250px" style="background-color: #545c64">
+					<el-row class="tac">
+						<el-col :span="24">
+							<el-menu :default-active="activeMenu" class="el-menu-vertical-demo" @open="handleOpen"
+								@close="handleClose" background-color="#545c64" text-color="#fff"
+								active-text-color="#ffd04b">
+
+							
+								<el-submenu index="1">
+									<template slot="title">
+										<i class="el-icon-location"></i>
+										<span>信息模型</span>
+									</template>
+									<el-menu-item-group>
+										<a href="/information_model2">
+											<el-menu-item index="1-1">注册</el-menu-item>
+										</a>
+										<a href="/search2">
+											<el-menu-item index="1-2">查询</el-menu-item>
+										</a>
+									</el-menu-item-group>
+								</el-submenu>
+
+								<a href="/mdr">
+									<el-menu-item index="2">
+										<i class="el-icon-menu"></i>
+										<span slot="title">MDR</span>
+									</el-menu-item>
+								</a>
+
+								<a href="/search1">
+									<el-menu-item index="3">
+										<i class="el-icon-document"></i>
+										<span slot="title">查询</span>
+									</el-menu-item>
+								</a>
+
+								<a href="/search2">
+									<el-menu-item index="4">
+										<i class="el-icon-document"></i>
+										<span slot="title">信息模型查询</span>
+									</el-menu-item>
+								</a>
+
+								<a href="/information_model2">
+									<el-menu-item index="5">
+										<i class="el-icon-menu"></i>
+										<span slot="title">信息模型注册</span>
+									</el-menu-item>
+								</a>
+
+								<a href="/index2">
+									<el-menu-item index="6">
+										<i class="el-icon-menu"></i>
+										<span slot="title">首页</span>
+									</el-menu-item>
+								</a>
+
+							</el-menu>
+						</el-col>
+					</el-row>
+				</el-aside>
+
+				<el-container>
+
+
+
+					<el-header>信息模型注册</el-header>
+					<el-container>
+						<el-aside width="200px">
+							<el-aside class="sidebar" width="200px">
+								<el-row>
+									<el-col>
+
+
+										<el-button class="button" type="primary" @click="changeShowAddClassTable">
+											添加类
+										</el-button>
+									</el-col>
+								</el-row>
+								<el-row>
+									<el-col>
+										<el-button class="button" type="primary"
+											@click="changeShowAddRelationshipTable">
+											添加关系
+										</el-button>
+									</el-col>
+								</el-row>
+							</el-aside>
+						</el-aside>
+						<el-main class="main">
+
+							<el-card ref="registerForm" :model="registerData" label-width="auto"
+								style="margin-top: 20px;" v-show="showAddClassTable">
+								<el-form>
+									<div style="text-align: center;">
+										<h5>添加类</h5>
+									</div>
+									<el-form-item label="模型名称">
+										<!-- <el-input v-model="registerData.model_name"></el-input> -->
+										<template>
+											<el-select v-model="registerData.model_name" filterable allow-create
+												default-first-option placeholder="请选择信息模型"
+												@change="handleSelectChangeOfModelTypeRegisterClass">
+												<el-option v-for="item in optionsOfModelName" :key="item.value"
+													:label="item.label" :value="item.value">
+												</el-option>
+											</el-select>
+										</template>
+									</el-form-item>
+
+									<el-form-item label="类名">
+										<!-- <el-input v-model="registerData.class_name"></el-input> -->
+										<template>
+											<el-select v-model="registerData.class_name" filterable allow-create
+												default-first-option placeholder="请选择类">
+												<el-option v-for="item in optionsOfModelClassName" :key="item.value"
+													:label="item.label" :value="item.value">
+												</el-option>
+											</el-select>
+										</template>
+									</el-form-item>
+									<el-divider content-position="center">属性</el-divider>
+									<div v-for="(property, index) in registerData.properties" :key="index">
+										<el-form-item :label="`属性名 ${index + 1}`">
+											<el-input v-model="registerData.properties[index]"></el-input>
+										</el-form-item>
+									</div>
+									<el-form-item>
+										<el-button type="primary" @click="registerModel">注册类</el-button>
+										<el-button type="primary" @click="addPropertyInput">+</el-button>
+										<el-button type="primary" @click="registerProperty">注册属性</el-button>
+										<el-button type="danger" @click="resetForm">重置</el-button>
+									</el-form-item>
+
+								</el-form>
+							</el-card>
+
+
+							<el-card :model="registerRelationShip" label-width="auto" style="margin-top: 20px;"
+								v-show="showAddRelationshipTable">
+								<el-form>
+									<div style="text-align: center;">
+										<h5>添加关系</h5>
+									</div>
+									<el-form-item label="信息模型">
+										<template>
+											<el-select v-model="model_name" filterable default-first-option
+												placeholder="请选择信息模型"
+												@change="handleSelectChangeOfModelTypeRegisterRelation">
+												<el-option v-for="item in optionsOfModelName" :key="item.value"
+													:label="item.label" :value="item.value">
+												</el-option>
+											</el-select>
+										</template>
+									</el-form-item>
+									<el-form-item label="类 1">
+										<template>
+											<el-select v-model="registerRelationShip.class1" filterable
+												default-first-option placeholder="请选择类">
+												<el-option v-for="item in optionsOfModelClassName" :key="item.value"
+													:label="item.label" :value="item.value">
+												</el-option>
+											</el-select>
+										</template>
+									</el-form-item>
+									<el-form-item label="类 2">
+										<template>
+											<el-select v-model="registerRelationShip.class2" filterable
+												default-first-option placeholder="请选择类">
+												<el-option v-for="item in optionsOfModelClassName" :key="item.value"
+													:label="item.label" :value="item.value">
+												</el-option>
+											</el-select>
+										</template>
+									</el-form-item>
+									<el-form-item label="关系名">
+										<el-input v-model="registerRelationShip.relation"></el-input>
+									</el-form-item>
+									<el-form-item>
+										<el-button type="primary" @click="registerRelation">注册</el-button>
+										<el-button type="danger" @click="resetForm">重置</el-button>
+									</el-form-item>
+								</el-form>
+							</el-card>
+
+						</el-main>
+					</el-container>
+				</el-container>
+			</el-container>
+		</div>
+		<script src="/static/js/information_model.js"></script>
+	</body>
+</html>

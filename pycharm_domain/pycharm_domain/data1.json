@@ -1,0 +1,28 @@
+[
+    {
+        "value": "AN060",
+        "label": "他引频次"
+    },
+    {
+        "value": "AN059",
+        "label": "被引频次"
+    },
+    {
+        "value": "AN058",
+        "label": "下载频次"
+    },
+    {
+        "value": "AN057",
+        "label": "法律状态",
+        "children": [
+            {
+                "value": "AV058",
+                "label": "B"
+            },
+            {
+                "value": "AV058",
+                "label": "A"
+            }
+        ]
+    }
+]

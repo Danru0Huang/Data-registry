@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>问答系统</title>
+		<!-- 引入 Vue.js -->
+		<script src="/static/js/vue.min.js"></script>
+
+		<!-- 引入 Element UI 的样式文件 -->
+		<link rel="stylesheet" href="/static/element-ui/theme-chalk/index.css">
+
+		<!-- 引入 Element UI 的 JavaScript文件 -->
+		<script src="/static/element-ui/index.js"></script>
+
+		<!-- 引入 axios 的 JavaScript文件 -->
+		<script src="/static/js/axios.min.js"></script>
+		<style>
+			.el-header {
+				background-color: #B3C0D1;
+				color: #333;
+				line-height: 60px;
+			}
+
+			.el-aside {
+				color: #333;
+			}
+
+			.chat-container {
+				max-width: 1000px;
+				width: 100%;
+				height: 750px;
+				margin: 0 auto;
+				padding: 20px;
+				border: 1px solid #ccc;
+				border-radius: 10px;
+				background-color: #f6f6f6;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+				display: flex;
+				flex-direction: column;
+			}
+
+			.message-container {
+				flex: 1;
+				max-height: calc(100% - 60px);
+				overflow-y: auto;
+				padding-bottom: 10px;
+			}
+
+			.message {
+				display: flex;
+				justify-content: flex-start;
+				align-items: flex-start;
+				margin-bottom: 10px;
+			}
+
+			.message.user .message-bubble {
+				margin-left: auto;
+				background-color: #DCF8C6;
+				color: #000;
+			}
+
+			.message.bot .message-bubble {
+				margin-right: auto;
+				background-color: #F0F0F0;
+				color: #000;
+			}
+
+			.message-bubble {
+				max-width: 70%;
+				padding: 10px;
+				border-radius: 10px;
+				background: #fff;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+			}
+
+			.input-container {
+				display: flex;
+				gap: 10px;
+				margin-top: 10px;
+			}
+
+			.input-container input {
+				flex: 1;
+				width: 100%;
+				border-radius: 20px;
+				padding: 10px 20px;
+			}
+
+			.input-container button {
+				flex: none;
+				border-radius: 20%;
+				width: 15%;
+				height: 40px;
+			}
+
+			.text {
+				font-size: 14px;
+			}
+
+			.item {
+				margin-bottom: 18px;
+			}
+
+			.clearfix:before,
+			.clearfix:after {
+				display: table;
+				content: "";
+			}
+
+			.clearfix:after {
+				clear: both
+			}
+
+			.box-card {
+				width: center;
+
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+			<el-container style="height: auto; border: 1px solid #eee">
+				<el-aside width="250px" style="background-color: #545c64">
+					<el-row class="tac">
+						<el-col :span="24">
+							<el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen"
+								@close="handleClose" background-color="#545c64" text-color="#fff"
+								active-text-color="#ffd04b">
+
+								<a href="/QA">
+									<el-menu-item index="1">
+										<i class="el-icon-menu"></i>
+										<span slot="title">问答系统</span>
+									</el-menu-item>
+								</a>
+
+								<a href="/search">
+									<el-menu-item index="2">
+										<i class="el-icon-document"></i>
+										<span slot="title">查询</span>
+									</el-menu-item>
+								</a>
+
+							</el-menu>
+						</el-col>
+					</el-row>
+
+				</el-aside>
+
+				<el-container>
+
+					<el-main>
+						<el-card class="box-card">
+							<div slot="header" class="clearfix" style="text-align: center;">
+								<span>A QA system base on knowledge graph</span>
+							</div>
+							<div class="chat-container">
+								<div class="message-container" ref="messageContainer">
+									<div v-for="(message, index) in messages" :key="index"
+										:class="['message', message.sender]">
+										<div class="message-bubble" v-text="message.content" v-if="message.type == 'text'">
+											<!-- [[ message.content ]] -->
+										</div>
+										<!-- <div class="message-bubble" v-else-if="message.type == 'img'">
+											<img src="/static/img/aa.png"/>
+										</div> -->
+										<div class="message-bubble" v-else-if="message.type == 'img'" v-html="message.content">
+											
+										</div>
+									</div>
+								</div>
+								<div class="input-container">
+									<input v-model="inputText" placeholder="输入你的问题" @keydown.enter="sendMessage">
+									<!-- <button type="button" @click="sendMessage">发送</button> -->
+									<el-button type="primary" icon="el-icon-search" @click="sendMessage"
+										round>发送</el-button>
+								</div>
+							</div>
+						</el-card>
+					</el-main>
+				</el-container>
+			</el-container>
+		</div>
+		<script src="/static/js/QA.js"></script>
+	</body>
+</html>
